@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise RAG – Intelligent Document Intelligence</title>
+  <meta name="description" content="Enterprise-grade RAG platform. Upload documents and images, then ask questions powered by LLaMA AI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">Enterprise<span class="accent">RAG</span></span>
+      </div>
+      <div class="nav-links">
+        <a href="#upload">Upload</a>
+        <a href="#chat">Chat</a>
+        <a href="#about">About</a>
+      </div>
+      <div class="nav-badge">
+        <span class="dot" id="statusDot"></span>
+        <span id="statusText">Disconnected</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <div class="hero-bg">
+      <div class="orb orb1"></div>
+      <div class="orb orb2"></div>
+      <div class="orb orb3"></div>
+      <div class="grid-overlay"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span>🚀</span> Powered by LLaMA 4 + FAISS Vector Search
+      </div>
+      <h1 class="hero-title">
+        Ask Anything About<br/>
+        <span class="gradient-text typing-text" id="typingText"></span>
+      </h1>
+      <p class="hero-sub">
+        Upload PDFs or images, then have intelligent conversations with your documents. 
+        Enterprise-grade RAG powered by Groq's ultra-fast inference.
+      </p>
+      <div class="hero-cta">
+        <a href="#upload" class="btn-primary">
+          <span>Get Started</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#chat" class="btn-ghost">Try the Chat →</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num">LLaMA 4</span><span class="stat-label">Model</span></div>
+        <div class="stat-div"></div>
+        <div class="stat"><span class="stat-num">FAISS</span><span class="stat-label">Vector DB</span></div>
+        <div class="stat-div"></div>
+        <div class="stat"><span class="stat-num">Groq</span><span class="stat-label">Inference</span></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="doc-card floating">
+        <div class="doc-header">
+          <div class="doc-icon pdf">📄</div>
+          <div>
+            <div class="doc-name">report.pdf</div>
+            <div class="doc-size">2.4 MB</div>
+          </div>
+          <div class="doc-check">✓</div>
+        </div>
+        <div class="doc-lines">
+          <div class="doc-line w80"></div>
+          <div class="doc-line w60"></div>
+          <div class="doc-line w90"></div>
+          <div class="doc-line w50"></div>
+        </div>
+      </div>
+      <div class="chat-preview floating-slow">
+        <div class="chat-bubble user">What are the Q3 highlights?</div>
+        <div class="chat-bubble ai">
+          <span class="ai-tag">AI</span>
+          Based on the report, Q3 highlights include a 23% revenue increase...
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- UPLOAD SECTION -->
+  <section class="section upload-section" id="upload">
+    <div class="section-inner">
+      <div class="section-label">Step 1</div>
+      <h2 class="section-title">Upload Your <span class="gradient-text">Documents</span></h2>
+      <p class="section-sub">Multiple PDFs ya images drop karo. AI sabko process karke vectorize kar dega.</p>
+
+      <div class="upload-grid">
+        <!-- PDF Upload -->
+        <div class="upload-card" id="pdfCard">
+          <div class="upload-drop-zone" id="pdfDropZone">
+            <input type="file" id="pdfInput" accept=".pdf" multiple hidden />
+            <div class="upload-icon">📄</div>
+            <h3>PDF Documents</h3>
+            <p>Drag &amp; drop or <span class="link-text">browse</span></p>
+            <div class="upload-formats">.pdf · multiple files supported</div>
+          </div>
+          <!-- Multi-file list for PDFs -->
+          <div class="file-list" id="pdfFileList" style="display:none">
+            <div class="file-list-header">
+              <span class="file-list-title">📄 Selected PDFs</span>
+              <span class="file-count-badge" id="pdfCountBadge">0 files</span>
+            </div>
+            <ul class="file-items" id="pdfItems"></ul>
+            <button class="btn-clear-all" onclick="clearAllPdfs()">✕ Clear All</button>
+          </div>
+          <div class="btn-group">
+            <button class="btn-upload" id="uploadPdfBtn" onclick="uploadPdf()">
+              <span class="btn-text">⬆ Upload PDFs</span>
+              <span class="btn-loader" style="display:none">
+                <span class="spinner"></span> Processing...
+              </span>
+            </button>
+            <button class="btn-cancel" id="cancelPdfBtn" onclick="cancelUpload('pdf')" style="display:none">
+              ✕ Cancel
+            </button>
+          </div>
+        </div>
+
+        <!-- Image Upload -->
+        <div class="upload-card" id="imgCard">
+          <div class="upload-drop-zone" id="imgDropZone">
+            <input type="file" id="imgInput" accept="image/*" multiple hidden />
+            <div class="upload-icon">🖼️</div>
+            <h3>Image Files</h3>
+            <p>Drag &amp; drop or <span class="link-text">browse</span></p>
+            <div class="upload-formats">.jpg, .png, .webp · multiple files supported</div>
+          </div>
+          <!-- Multi-file list for Images -->
+          <div class="file-list" id="imgFileList" style="display:none">
+            <div class="file-list-header">
+              <span class="file-list-title">🖼️ Selected Images</span>
+              <span class="file-count-badge" id="imgCountBadge">0 files</span>
+            </div>
+            <ul class="file-items" id="imgItems"></ul>
+            <button class="btn-clear-all" onclick="clearAllImgs()">✕ Clear All</button>
+          </div>
+          <div class="btn-group">
+            <button class="btn-upload" id="uploadImgBtn" onclick="uploadImg()">
+              <span class="btn-text">⬆ Upload Images</span>
+              <span class="btn-loader" style="display:none">
+                <span class="spinner"></span> Processing...
+              </span>
+            </button>
+            <button class="btn-cancel" id="cancelImgBtn" onclick="cancelUpload('img')" style="display:none">
+              ✕ Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reset banner — upload complete hone ke baad dikhega -->
+      <div class="reset-banner" id="resetBanner" style="display:none">
+        <div class="reset-banner-left">
+          <span class="reset-icon">✅</span>
+          <span id="resetBannerText">Documents uploaded — You can now ask questions</span>
+        </div>
+        <button class="btn-reset-all" onclick="resetAllData()">
+          🗑️ Reset All Data
+        </button>
+      </div>
+
+      <!-- Upload Status Toast -->
+      <div class="toast" id="toast"></div>
+    </div>
+  </section>
+
+  <!-- DIVIDER -->
+  <div class="section-divider">
+    <div class="divider-line"></div>
+    <div class="divider-icon">✦</div>
+    <div class="divider-line"></div>
+  </div>
+
+  <!-- CHAT SECTION -->
+  <section class="section chat-section" id="chat">
+    <div class="section-inner">
+      <div class="section-label">Step 2</div>
+      <h2 class="section-title">Ask Your <span class="gradient-text">Document</span></h2>
+      <p class="section-sub">Ask any question about the uploaded content. AI answers from your document.</p>
+
+      <div class="chat-container">
+        <div class="chat-header">
+          <div class="chat-header-left">
+            <div class="ai-avatar">🤖</div>
+            <div>
+              <div class="ai-name">RAG Assistant</div>
+              <div class="ai-model">LLaMA 4 Scout • Groq Inference</div>
+            </div>
+          </div>
+          <button class="clear-btn" onclick="clearChat()" title="Clear chat">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H6L5,6"/><path d="M10,11v6M14,11v6"/><path d="M9,6V4h6v2"/></svg>
+            Clear
+          </button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-welcome">
+            <div class="welcome-icon">👋</div>
+            <h3>Hello! I'm your RAG Assistant</h3>
+            <p>Upload a document first, then ask me anything about it. I'll retrieve relevant information and answer precisely.</p>
+            <div class="suggestion-chips">
+              <button class="chip" onclick="useChip(this)">Summarize the document</button>
+              <button class="chip" onclick="useChip(this)">What are the key points?</button>
+              <button class="chip" onclick="useChip(this)">What is the main topic?</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-input-area">
+          <div class="chat-input-wrap">
+            <textarea
+              id="queryInput"
+              class="chat-textarea"
+              placeholder="Ask anything about your document..."
+              rows="1"
+              onkeydown="handleKey(event)"
+              oninput="autoResize(this)"
+            ></textarea>
+            <button class="send-btn" id="sendBtn" onclick="sendQuery()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
+            </button>
+          </div>
+          <div class="chat-footer-note">Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT SECTION -->
+  <section class="section about-section" id="about">
+    <div class="section-inner">
+      <h2 class="section-title">How It <span class="gradient-text">Works</span></h2>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <div class="step-icon">📤</div>
+          <h3>Upload</h3>
+          <p>Upload a PDF or image. The system extracts and chunks the content intelligently.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <div class="step-icon">🔢</div>
+          <h3>Vectorize</h3>
+          <p>Text chunks are embedded via sentence transformers and stored in a FAISS vector database.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <div class="step-icon">🔍</div>
+          <h3>Retrieve</h3>
+          <p>Your question is matched against the most relevant document chunks via similarity search.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-num">04</div>
+          <div class="step-icon">🤖</div>
+          <h3>Answer</h3>
+          <p>LLaMA 4 Scout generates a precise, context-grounded answer via Groq's fast inference API.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-logo">
+        <span class="logo-icon">⬡</span>
+        <span>Enterprise<span class="accent">RAG</span></span>
+      </div>
+      <p class="footer-copy">Built with FastAPI · LangChain · FAISS · Groq LLaMA 4</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
